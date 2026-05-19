@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ER-CAR Serviços Automotivos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,600;0,700;1,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #0a0a0a;
+      --charcoal: #141414;
+      --steel: #1e1e1e;
+      --red: #d62828;
+      --red-hot: #ff3333;
+      --yellow: #f7b731;
+      --white: #f0ede8;
+      --gray: #6b6b6b;
+      --light-gray: #2a2a2a;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'Barlow', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1000;
+      opacity: 0.4;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 900;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 4rem;
+      background: linear-gradient(to bottom, rgba(10,10,10,0.97), transparent);
+      transition: background 0.3s;
+    }
+    nav.scrolled { background: rgba(10,10,10,0.97); border-bottom: 1px solid #1e1e1e; }
+
+    .nav-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.8rem;
+      letter-spacing: 0.1em;
+      color: var(--white);
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--red); }
+
+    .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+    .nav-links a {
+      color: var(--gray);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--white); }
+
+    .nav-cta {
+      background: var(--red);
+      color: var(--white) !important;
+      padding: 0.55rem 1.4rem;
+      border-radius: 2px;
+      transition: background 0.2s !important;
+    }
+    .nav-cta:hover { background: var(--red-hot) !important; color: var(--white) !important; }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-end;
+      padding: 0 4rem 7rem;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 70% 40%, rgba(214,40,40,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 50% at 20% 80%, rgba(247,183,49,0.05) 0%, transparent 50%),
+        linear-gradient(160deg, #0a0a0a 40%, #141414 100%);
+    }
+
+    /* diagonal stripe accent */
+    .hero-bg::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 45%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        -60deg,
+        transparent,
+        transparent 18px,
+        rgba(255,255,255,0.013) 18px,
+        rgba(255,255,255,0.013) 19px
+      );
+    }
+
+    .hero-content { position: relative; z-index: 2; max-width: 780px; }
+
+    .hero-tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--yellow);
+      border: 1px solid rgba(247,183,49,0.4);
+      padding: 0.35rem 0.9rem;
+      margin-bottom: 1.8rem;
+      animation: fadeUp 0.8s ease both;
+    }
+
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(4.5rem, 10vw, 9rem);
+      line-height: 0.9;
+      letter-spacing: 0.02em;
+      animation: fadeUp 0.8s 0.15s ease both;
+    }
+    .hero-title .line-red { color: var(--red); display: block; }
+    .hero-title .line-dim { color: rgba(240,237,232,0.18); display: block; }
+
+    .hero-sub {
+      margin-top: 2rem;
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: rgba(240,237,232,0.55);
+      max-width: 480px;
+      animation: fadeUp 0.8s 0.3s ease both;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 3rem;
+      animation: fadeUp 0.8s 0.45s ease both;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.9rem 2rem;
+      font-family: 'Barlow', sans-serif;
+      font-weight: 600;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border-radius: 2px;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary { background: var(--red); color: var(--white); }
+    .btn-primary:hover { background: var(--red-hot); transform: translateY(-2px); }
+    .btn-ghost { background: transparent; color: var(--white); border: 1px solid rgba(240,237,232,0.2); }
+    .btn-ghost:hover { border-color: var(--white); transform: translateY(-2px); }
+
+    .hero-badge {
+      position: absolute;
+      right: 5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      animation: fadeUp 0.8s 0.6s ease both;
+    }
+    .hero-badge .badge-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 5rem;
+      color: rgba(240,237,232,0.06);
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      overflow: hidden;
+    }
+    .divider-strip {
+      height: 4px;
+      flex: 1;
+      background: var(--red);
+    }
+    .divider-strip.gray { background: var(--light-gray); }
+    .divider-strip.yellow { background: var(--yellow); flex: 0 0 60px; }
+
+    /* ── SECTION BASE ── */
+    section { padding: 7rem 4rem; }
+    .section-label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 1rem;
+    }
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2.8rem, 5vw, 4.5rem);
+      letter-spacing: 0.03em;
+      line-height: 1;
+    }
+
+    /* ── SERVICES ── */
+    #servicos { background: var(--charcoal); }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5px;
+      margin-top: 4rem;
+      background: var(--steel);
+      border: 1.5px solid var(--steel);
+    }
+
+    .service-card {
+      background: var(--charcoal);
+      padding: 2.8rem 2.4rem;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.3s;
+    }
+    .service-card::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 0; height: 3px;
+      background: var(--red);
+      transition: width 0.4s ease;
+    }
+    .service-card:hover { background: var(--steel); }
+    .service-card:hover::before { width: 100%; }
+
+    .service-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+      display: block;
+    }
+    .service-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.7rem;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.8rem;
+    }
+    .service-desc {
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: rgba(240,237,232,0.5);
+    }
+    .service-num {
+      position: absolute;
+      top: 1.5rem; right: 1.8rem;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 3.5rem;
+      color: rgba(240,237,232,0.04);
+      line-height: 1;
+    }
+
+    /* ── WHY US ── */
+    #por-que {
+      background: var(--black);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: center;
+    }
+
+    .why-visual {
+      position: relative;
+    }
+    .why-visual-box {
+      background: var(--charcoal);
+      border: 1px solid var(--steel);
+      padding: 3rem;
+      position: relative;
+    }
+    .why-visual-box::after {
+      content: '';
+      position: absolute;
+      top: 12px; left: 12px;
+      right: -12px; bottom: -12px;
+      border: 1px solid var(--red);
+      z-index: -1;
+    }
+    .why-visual-accent {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 6rem;
+      line-height: 0.9;
+      color: var(--red);
+      letter-spacing: -0.02em;
+    }
+    .why-visual-sub {
+      font-size: 1rem;
+      color: rgba(240,237,232,0.45);
+      margin-top: 1rem;
+      line-height: 1.6;
+    }
+
+    .why-list { list-style: none; margin-top: 3rem; display: flex; flex-direction: column; gap: 1.2rem; }
+    .why-item {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+    .why-dot {
+      width: 8px; height: 8px;
+      background: var(--red);
+      border-radius: 50%;
+      margin-top: 0.45rem;
+      flex-shrink: 0;
+    }
+    .why-text strong { display: block; font-weight: 600; font-size: 0.95rem; margin-bottom: 0.2rem; }
+    .why-text span { font-size: 0.85rem; color: rgba(240,237,232,0.5); }
+
+    /* ── CONTACT ── */
+    #contato {
+      background: var(--charcoal);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: start;
+    }
+
+    .contact-item {
+      display: flex;
+      gap: 1.2rem;
+      align-items: flex-start;
+      margin-bottom: 2rem;
+    }
+    .contact-icon-box {
+      width: 44px; height: 44px;
+      background: rgba(214,40,40,0.12);
+      border: 1px solid rgba(214,40,40,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      border-radius: 2px;
+    }
+    .contact-label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gray);
+      margin-bottom: 0.3rem;
+    }
+    .contact-value {
+      font-size: 0.97rem;
+      color: var(--white);
+      line-height: 1.5;
+    }
+    .contact-value a { color: inherit; text-decoration: none; }
+    .contact-value a:hover { color: var(--red); }
+
+    .whatsapp-big {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: #128c7e;
+      padding: 1.4rem 2rem;
+      border-radius: 2px;
+      text-decoration: none;
+      margin-top: 2rem;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .whatsapp-big:hover { background: #25d366; transform: translateY(-2px); }
+    .whatsapp-big .wa-icon { font-size: 1.8rem; }
+    .whatsapp-big .wa-text strong {
+      display: block;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #fff;
+    }
+    .whatsapp-big .wa-text span { font-size: 0.8rem; color: rgba(255,255,255,0.7); }
+
+    /* Map container */
+    .map-container {
+      background: var(--steel);
+      border: 1px solid var(--light-gray);
+      border-radius: 2px;
+      overflow: hidden;
+      height: 340px;
+    }
+    .map-container iframe { width: 100%; height: 100%; border: none; filter: grayscale(0.3) contrast(1.1); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--black);
+      padding: 2.5rem 4rem;
+      border-top: 1px solid var(--steel);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .footer-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.5rem;
+      letter-spacing: 0.1em;
+    }
+    .footer-logo span { color: var(--red); }
+    .footer-copy { font-size: 0.78rem; color: var(--gray); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── MOBILE ── */
+    @media (max-width: 900px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      .hero { padding: 0 1.5rem 5rem; }
+      .hero-badge { display: none; }
+      section { padding: 5rem 1.5rem; }
+      #por-que, #contato { grid-template-columns: 1fr; gap: 3rem; }
+      footer { padding: 2rem 1.5rem; flex-direction: column; text-align: center; }
+    }
+
+    /* floating whatsapp bubble */
+    .wa-float {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 800;
+      width: 58px; height: 58px;
+      background: #25d366;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.7rem;
+      box-shadow: 0 6px 24px rgba(37,211,102,0.4);
+      text-decoration: none;
+      animation: pulse 2.5s infinite;
+      transition: transform 0.2s;
+    }
+    .wa-float:hover { transform: scale(1.1); }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 6px 24px rgba(37,211,102,0.4); }
+      50% { box-shadow: 0 6px 36px rgba(37,211,102,0.65); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- WhatsApp float button -->
+  <a class="wa-float" href="https://wa.me/5512983002008" target="_blank" title="Falar no WhatsApp">💬</a>
+
+  <!-- NAV -->
+  <nav id="navbar">
+    <a class="nav-logo" href="#"><span>ER</span>-CAR</a>
+    <ul class="nav-links">
+      <li><a href="#servicos">Serviços</a></li>
+      <li><a href="#por-que">Por que nós</a></li>
+      <li><a href="#contato">Contato</a></li>
+      <li><a href="https://wa.me/5512983002008" class="nav-cta" target="_blank">WhatsApp</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <div class="hero-tag">⚙ Mecânica Especializada · São José dos Campos</div>
+      <h1 class="hero-title">
+        <span>ER-CAR</span>
+        <span class="line-red">SERVIÇOS</span>
+        <span class="line-dim">AUTOMOTIVOS</span>
+      </h1>
+      <p class="hero-sub">Suspensão, mecânica geral e muito mais. Diagnóstico preciso, qualidade garantida e atendimento honesto para o seu veículo.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="https://wa.me/5512983002008" target="_blank">💬 Agendar via WhatsApp</a>
+        <a class="btn btn-ghost" href="#servicos">Ver Serviços</a>
+      </div>
+    </div>
+    <div class="hero-badge">
+      <span class="badge-num">SJC</span>
+    </div>
+  </header>
+
+  <!-- DIVIDER -->
+  <div class="divider">
+    <div class="divider-strip gray"></div>
+    <div class="divider-strip yellow"></div>
+    <div class="divider-strip"></div>
+    <div class="divider-strip gray"></div>
+  </div>
+
+  <!-- SERVICES -->
+  <section id="servicos">
+    <div class="reveal">
+      <p class="section-label">O que fazemos</p>
+      <h2 class="section-title">Nossos Serviços</h2>
+    </div>
+    <div class="services-grid">
+      <div class="service-card reveal">
+        <span class="service-num">01</span>
+        <span class="service-icon">🔧</span>
+        <div class="service-name">Suspensão</div>
+        <p class="service-desc">Alinhamento, balanceamento, amortecedores, molas, bandejas e todos os componentes da suspensão do seu veículo.</p>
+      </div>
+      <div class="service-card reveal">
+        <span class="service-num">02</span>
+        <span class="service-icon">⚙️</span>
+        <div class="service-name">Mecânica Geral</div>
+        <p class="service-desc">Revisão completa, troca de óleo, filtros, correia dentada, embreagem e diagnóstico eletrônico.</p>
+      </div>
+      <div class="service-card reveal">
+        <span class="service-num">03</span>
+        <span class="service-icon">🛞</span>
+        <div class="service-name">Freios</div>
+        <p class="service-desc">Pastilhas, discos, tambores, fluido de freio e inspeção completa do sistema de frenagem.</p>
+      </div>
+      <div class="service-card reveal">
+        <span class="service-num">04</span>
+        <span class="service-icon">🔍</span>
+        <div class="service-name">Diagnóstico</div>
+        <p class="service-desc">Scanner automotivo para identificar falhas, luz do motor acesa e problemas no sistema eletrônico.</p>
+      </div>
+      <div class="service-card reveal">
+        <span class="service-num">05</span>
+        <span class="service-icon">🛠️</span>
+        <div class="service-name">Direção</div>
+        <p class="service-desc">Direção hidráulica, elétrica e mecânica. Revisão de caixa de direção, terminais e articulações.</p>
+      </div>
+      <div class="service-card reveal">
+        <span class="service-num">06</span>
+        <span class="service-icon">📋</span>
+        <div class="service-name">Revisão Preventiva</div>
+        <p class="service-desc">Revisão completa do veículo com checklist detalhado para evitar problemas antes que aconteçam.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- DIVIDER -->
+  <div class="divider">
+    <div class="divider-strip"></div>
+    <div class="divider-strip yellow"></div>
+    <div class="divider-strip gray"></div>
+  </div>
+
+  <!-- WHY US -->
+  <section id="por-que">
+    <div class="why-visual reveal">
+      <div class="why-visual-box">
+        <div class="why-visual-accent">QUALI&shy;DADE<br>REAL</div>
+        <p class="why-visual-sub">Cada serviço é realizado com atenção e responsabilidade. Seu carro merece o melhor.</p>
+        <a class="btn btn-primary" style="margin-top:2rem; display:inline-flex;" href="https://wa.me/5512983002008" target="_blank">Solicitar Orçamento</a>
+      </div>
+    </div>
+    <div class="why-content reveal">
+      <p class="section-label">Por que escolher a ER-CAR</p>
+      <h2 class="section-title">Confiança em cada serviço</h2>
+      <ul class="why-list">
+        <li class="why-item">
+          <div class="why-dot"></div>
+          <div class="why-text">
+            <strong>Diagnóstico Honesto</strong>
+            <span>Explicamos o problema de forma clara antes de começar qualquer serviço.</span>
+          </div>
+        </li>
+        <li class="why-item">
+          <div class="why-dot"></div>
+          <div class="why-text">
+            <strong>Orçamento Sem Surpresas</strong>
+            <span>Preço combinado é preço cobrado. Transparência total com o cliente.</span>
+          </div>
+        </li>
+        <li class="why-item">
+          <div class="why-dot"></div>
+          <div class="why-text">
+            <strong>Peças de Qualidade</strong>
+            <span>Utilizamos peças originais e de primeira linha para garantir durabilidade.</span>
+          </div>
+        </li>
+        <li class="why-item">
+          <div class="why-dot"></div>
+          <div class="why-text">
+            <strong>Atendimento Rápido via WhatsApp</strong>
+            <span>Tire dúvidas e agende sem complicação direto pelo celular.</span>
+          </div>
+        </li>
+        <li class="why-item">
+          <div class="why-dot"></div>
+          <div class="why-text">
+            <strong>Localização Central em SJC</strong>
+            <span>Fácil acesso em São José dos Campos, no Jardim Rosário.</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contato">
+    <div class="reveal">
+      <p class="section-label">Fale conosco</p>
+      <h2 class="section-title">Como nos encontrar</h2>
+      <br>
+      <div class="contact-item">
+        <div class="contact-icon-box">📍</div>
+        <div>
+          <div class="contact-label">Endereço</div>
+          <div class="contact-value">R. Torataro Takitani, 335<br>Jardim Rosário · São José dos Campos – SP<br>CEP 12236-280</div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-icon-box">📱</div>
+        <div>
+          <div class="contact-label">WhatsApp / Telefone</div>
+          <div class="contact-value"><a href="tel:+5512983002008">+55 12 98300-2008</a></div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-icon-box">🕐</div>
+        <div>
+          <div class="contact-label">Horário</div>
+          <div class="contact-value">Entre em contato para confirmar disponibilidade</div>
+        </div>
+      </div>
+      <a class="whatsapp-big" href="https://wa.me/5512983002008" target="_blank">
+        <span class="wa-icon">💬</span>
+        <div class="wa-text">
+          <strong>Chamar no WhatsApp</strong>
+          <span>+55 12 98300-2008 · Resposta rápida</span>
+        </div>
+      </a>
+    </div>
+    <div class="map-container reveal">
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3667.22!2d-45.9!3d-23.19!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zUi4gVG9yYXRhcm8gVGFraXRhbmksIDMzNSAtIEphcmRpbSBSb3Nhcmlvs!5e0!3m2!1spt-BR!2sbr!4v1"
+        allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+        title="Localização ER-CAR"
+        src="https://maps.google.com/maps?q=R.+Torataro+Takitani+335+Jardim+Rosario+São+José+dos+Campos+SP&output=embed&z=16">
+      </iframe>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo"><span>ER</span>-CAR</div>
+    <div class="footer-copy">© 2025 ER-CAR Serviços Automotivos · São José dos Campos – SP</div>
+    <a class="btn btn-primary" href="https://wa.me/5512983002008" target="_blank" style="font-size:0.75rem; padding:0.6rem 1.2rem;">💬 WhatsApp</a>
+  </footer>
+
+  <script>
+    // Navbar scroll
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 60);
+    });
+
+    // Reveal on scroll
+    const reveals = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          e.target.style.transitionDelay = (i * 0.08) + 's';
+          e.target.classList.add('visible');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    reveals.forEach(el => io.observe(el));
+
+    // Fix map iframe (use correct src)
+    const mapIframe = document.querySelector('.map-container iframe');
+    if (mapIframe) {
+      mapIframe.src = "https://maps.google.com/maps?q=R.+Torataro+Takitani,+335,+Jardim+Rosario,+São+José+dos+Campos,+SP&output=embed&z=16";
+    }
+  </script>
+</body>
+</html>
